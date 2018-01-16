@@ -137,7 +137,7 @@ public class Server {
                 // 文件名和长度  
                 String fileName = dis.readUTF();  
                 long fileLength = dis.readLong();  
-                File directory = new File("D:\\FTCache");  
+                File directory = new File(filePath);  
                 if(!directory.exists()) {  
                     directory.mkdir();  
                 }  
@@ -242,13 +242,16 @@ public class Server {
 			   if (tempList[i].isFile()) {
 				   java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				   String dateTime=df.format(new Date(tempList[i].lastModified()));
-				   System.out.println("文   件："+tempList[i]+"     "+dateTime+"     "+tempList[i].length()+"kb");
+				   writer.println("文   件："+tempList[i]+"     "+dateTime+"     "+tempList[i].length()+"kb");
+				   writer.flush();
 			   }
 			   if (tempList[i].isDirectory()) {
 				   java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				   String dateTime=df.format(new Date(tempList[i].lastModified()));
-				   System.out.println("文件夹："+tempList[i]+"    "+dateTime+"    "+tempList[i].length()+"kb");
+				   writer.println("文件夹："+tempList[i]+"    "+dateTime+"    "+tempList[i].length()+"kb");
+				   writer.flush();
 			   }
 		  }
+		  writer.println("EOF");
 	}
 }
