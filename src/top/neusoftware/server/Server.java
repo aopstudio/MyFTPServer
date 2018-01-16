@@ -15,11 +15,18 @@ public class Server {
 		Boolean con=true;
 		Boolean user=false;
 		Boolean pass=false;
+		info=reader.readLine();
+		writer.println("220 FTP server ready");
+		writer.flush();
 		while(con) {
 			info=reader.readLine();
 			if(info.startsWith("USER")) {
 				if(user) {
 					writer.println("230 Already logged-in");
+					writer.flush();
+				}
+				else if(info.length()<=5){
+					writer.println("501 syntax error");
 					writer.flush();
 				}
 				else if(info.substring(5).equals("root")) {
@@ -43,6 +50,10 @@ public class Server {
 				}
 				else if(pass) {
 					writer.println("202 Already logged-in");
+					writer.flush();
+				}
+				else if(info.length()<=5){
+					writer.println("501 syntax error");
 					writer.flush();
 				}
 				else if(info.substring(5).equals("root")) {
