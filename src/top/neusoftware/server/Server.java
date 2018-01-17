@@ -6,7 +6,7 @@ import java.net.*;
 import java.sql.Date;
 import java.text.DecimalFormat;
 import java.util.Random;
-
+//Default user is root.Default pass is root
 public class Server {
 	ServerSocket ss;
 	Socket s;
@@ -194,15 +194,16 @@ public class Server {
 			writer.println("150 Opening data connection");
 			writer.flush();
 			try {  
-	            File file = new File(fileName);  
-	            if(file.exists()) {  
-	                fis = new FileInputStream(file);  
+	            File file1 = new File(filePath+fileName);  //在当前工作路径下的文件
+	            File file2 =new File(fileName);//如果在当前路径下找不到，就去全局找
+	            if(file1.exists()) {  
+	                fis = new FileInputStream(file1);  
 	                dos = new DataOutputStream(socket.getOutputStream());  
 	  
 	                // 文件名和长度  
-	                dos.writeUTF(file.getName());  
+	                dos.writeUTF(file1.getName());  
 	                dos.flush();  
-	                dos.writeLong(file.length());  
+	                dos.writeLong(file1.length());  
 	                dos.flush();  
 	  
 	                // 开始传输文件  
@@ -214,11 +215,35 @@ public class Server {
 	                    dos.write(bytes, 0, length);  
 	                    dos.flush();  
 	                    progress += length;  
-	                    System.out.print("| " + (100*progress/file.length()) + "% |");  
+	                    System.out.print("| " + (100*progress/file1.length()) + "% |");  
 	                }  
 	                System.out.println();  
 	                System.out.println("======== 文件传输成功 ========");  
-	            }  
+	            } 
+	            else if(file2.exists()) {
+	            	fis = new FileInputStream(file2);  
+	                dos = new DataOutputStream(socket.getOutputStream());  
+	  
+	                // 文件名和长度  
+	                dos.writeUTF(file2.getName());  
+	                dos.flush();  
+	                dos.writeLong(file2.length());  
+	                dos.flush();  
+	  
+	                // 开始传输文件  
+	                System.out.println("======== 开始传输文件 ========");  
+	                byte[] bytes = new byte[1024];  
+	                int length = 0;  
+	                long progress = 0;  
+	                while((length = fis.read(bytes, 0, bytes.length)) != -1) {  
+	                    dos.write(bytes, 0, length);  
+	                    dos.flush();  
+	                    progress += length;  
+	                    System.out.print("| " + (100*progress/file2.length()) + "% |");  
+	                }  
+	                System.out.println();  
+	                System.out.println("======== 文件传输成功 ========");  
+	            }
 	        } catch (Exception e) {  
 	            e.printStackTrace();  
 	        } finally {  
@@ -235,9 +260,13 @@ public class Server {
 	}
 	
 	public void listDirectory() {
+		if(user&&pass&&pasv) {
 		File file=new File(filePath);
 		  File[] tempList = file.listFiles();
-		  System.out.println("该目录下对象个数："+tempList.length);
+		  writer.println("150 Opening data connection");
+		  writer.flush();
+		  writer.println("该目录下对象个数："+tempList.length);
+		  writer.flush();
 		  for (int i = 0; i < tempList.length; i++) {
 			   if (tempList[i].isFile()) {
 				   java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -253,5 +282,44 @@ public class Server {
 			   }
 		  }
 		  writer.println("EOF");
+		  writer.flush();
+		}
+		else if(!user||!pass) {
+			writer.println("530 Please log in with USER and PASS first.");
+			writer.flush();
+		}
+		else {
+			writer.println("503 Bad sequence of commands.");
+			writer.flush();
+		}
+	}
+	
+	public void changeWorkDirectory(String info) {
+		if(user&&pass&&pasv) {
+			File file1=new File(filePath+info);//在当前目录下切换
+			File file2=new File(info);//在所有目录下切换
+			if(file1.isDirectory()) {
+				filePath=filePath+info;
+				writer.println("250 Command okay");
+				writer.flush();
+			}
+			else if(file2.isDirectory()){
+				filePath=info;
+				writer.println("250 Command okay");
+				writer.flush();
+			}
+			else {
+				writer.println("550 No such directory");
+				writer.flush();
+			}
+		}
+		else if(!user||!pass) {
+			writer.println("530 Please log in with USER and PASS first.");
+			writer.flush();
+		}
+		else {
+			writer.println("503 Bad sequence of commands.");
+			writer.flush();
+		}
 	}
 }

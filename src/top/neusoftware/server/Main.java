@@ -25,10 +25,13 @@ public class Main {
 				ser.receiveFile();
 			}
 			else if(info.startsWith("RETR")) {
-				ser.sendFile(info.substring(5));
+				ser.sendFile(info.substring(5));//这样会有异常隐患，但修改时间已经不够了
 			}
 			else if(info.startsWith("LIST")) {
 				ser.listDirectory();
+			}
+			else if(info.startsWith("CWD")) {
+				ser.changeWorkDirectory(info.substring(4));
 			}
 			else if(info.equals("QUIT")) {
 				con=false;
